@@ -107,7 +107,7 @@ void nlplant(double *xu,double *xdot){
     phi   = xu[3];  // rad    
     theta = xu[4];  // rad
     psi   = xu[5];  // rad
-    vc    = xu[6];
+    vt    = xu[6];
     alpha = xu[7];  // rad
     beta  = xu[8];  // rad
     P     = xu[9];
@@ -349,3 +349,113 @@ void nlplant(double *xu,double *xdot){
     free(temp);
 
 };  // end function: nlplant()
+
+/*****************************************************************************/
+/*                             Some Sub-Functions                            */
+/*****************************************************************************/
+/*-----------------------------------------------------------------------*/
+/*                            Atmosphere                                 */
+/*-----------------------------------------------------------------------*/
+void atmos(double alt, double vt, double *coeff) {
+    
+    double rho0 = 2.377e-3;
+    double tfac, temp, rho, mach, qbar, ps;
+
+    tfac = 1 - 0.703e-5*(alt);
+    temp = 519.0*tfac;
+    if (alt >= 35000.0) {temp = 390;}
+    rho = rho0*pow(tfac,4.14);
+    mach = (vt)/sqrt(1.4*1716.3*temp);
+    qbar = 0.5*rho*pow(vt,2);
+    ps   = 1715.0*rho*temp;
+    if (ps == 0) {ps = 1715;}
+
+    coeff[0] = mach;
+    coeff[1] = qbar;
+    coeff[2] = ps;
+}
+
+/*-----------------------------------------------------------------------*/
+/*                          Accelerations                                */
+/*-----------------------------------------------------------------------*/
+void accels(double *state,double *xdot, double *y){
+    
+    #define grav 32.174
+    
+    double phi,theta;
+    double vt,alpha,beta,vt_dot,alpha_dot,beta_dot;
+    double P,Q,R;
+    double sina, cosa, sinb, cosb;
+    double vel_u, vel_v, vel_w;
+    double u_dot, v_dot, w_dot;
+    double nx_cg, ny_cg, nz_cg;
+
+    phi   = state[3];
+    theta = state[4]; 
+    vt    = state[6];
+    alpha = state[7];
+    beta  = state[8];
+    P     = state[9];
+    Q     = state[10];
+    R     = state[11];
+    vt_dot    = xout[6];
+    alpha_dot = xout[7];
+    beta_dot  = xout[8];
+
+    sina = sin(alpha);
+    cosa = cos(alpha);
+    sinb = sin(beta);
+    cosb = cos(beta);
+    vel_u = vt*cosa*cosb;
+    vel_v = vt*sinb;
+    vel_w = vt*sina*cosb;
+    u_dot = vt_dot * cosa * cosb + vt * (-sina * alpha_dot) * cosb + vt * cosa * (-sinb * beta_dot);
+    v_dot = vt_dot * sinb + vt * (cosb * beta_dot);
+    w_dot = vt_dot * sina * cosb + vt * (cosa * alpha_dot) * cosb + vt * sina * (-sinb * beta_dot);
+
+    nx_cg = 1.0/grav*(u_dot + Q*vel_w - R*vel_v) + sin(theta);
+    ny_cg = 1.0/grav*(v_dot + R*vel_u - P*vel_w) - cos(theta)*sin(phi);
+    nz_cg = -1.0/grav*(w_dot + P*vel_v - Q*vel_u) + cos(theta*cos(phi);
+
+    y[0] = nx_cg;
+    y[1] = ny_cg;
+    y[2] = nz_cg;
+}
+
+
+/*-----------------------------------------------------------------------*/
+/*                                  fix                                  */
+/*-----------------------------------------------------------------------*/
+int fix(double in){
+
+    int out;
+
+    if (in >= 0.0){
+        out = (int)floor(in);
+    }
+    else if (in < 0.0){
+        out = (int)ceil(in);
+    }
+
+    return out;
+}
+
+/*-----------------------------------------------------------------------*/
+/*                                 sign                                  */
+/*-----------------------------------------------------------------------*/
+int sign(double in){
+    
+    int out;
+
+    if (in > 0.0){
+        out = 1;
+    }
+    else if (in < 0.0){
+        out = -1; 
+    }
+    else if (in == 0.0){
+        out = 0;
+    }
+
+    return out
+}
