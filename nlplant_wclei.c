@@ -6,7 +6,7 @@
     https://www.aem.umn.edu/people/faculty/balas/darpa_sec/SEC.Software.html#F16Manual 
 */
 
-#include "math.h"
+#include <math.h>
 #include "lofi_F16_AeroData.c"  // the LOFI look-up table file
 #include "hifi_F16_AeroData.c"  // the HIFI look-up table file
 
@@ -162,5 +162,129 @@ void nlplant(double *xu,double *xdot){
     xdot[4] = Q*cphi - R*sphi;  // thetadot
     xdot[5] = (Q*sphi + R*cphi)/ct; //psidot
 
+    /* Aerodynamic Data */
+    if (fi_flag == 1)   // HIFI Aerodynamic Table
+    {
+        hifi_C(alpha,beta,el,temp);
+        Cx = temp[0];
+        Cz = temp[1];
+        Cm = temp[2];
+        Cy = temp[3];
+        Cn = temp[4];
+        Cl = temp[5];
 
+        hifi_damping(alpha,temp);
+        Cxq = temp[0];
+        Cyr = temp[1];
+        Cyp = temp[2];
+        Czq = temp[3];
+        Clr = temp[4];
+        Clp = temp[5];
+        Cmq = temp[6];
+        Cnr = temp[7];
+        Cnp = temp[8];
+
+        hifi_C_lef(alpha,beta,temp);
+        delta_Cx_lef = temp[0];
+        delta_Cz_lef = temp[1];
+        delta_Cm_lef = temp[2];
+        delta_Cy_lef = temp[3];
+        delta_Cn_lef = temp[4];
+        delta_Cl_lef = temp[5];
+
+        hifi_damping_lef(alpha,temp);
+        delta_Cxq_lef = temp[0];
+        delta_Cyr_lef = temp[1];
+        delta_Cyp_lef = temp[2];
+        delta_Czq_lef = temp[3];
+        delta_Clr_lef = temp[4];
+        delta_Clp_lef = temp[5];
+        delta_Cmq_lef = temp[6];
+        delta_Cnr_lef = temp[7];
+        delta_Cnp_lef = temp[8];
+
+        hifi_rudder(alpha,beta,temp);
+        delta_Cy_r30 = temp[0];
+        delta_Cn_r30 = temp[1];
+        delta_Cl_r30 = temp[2];
+
+        hifi_ailerons(alpha,beta,temp);
+        delta_Cy_a20     = temp[0];
+        delta_Cy_a20_lef = temp[1];
+        delta_Cn_a20     = temp[2];
+        delta_Cn_a20_lef = temp[3];
+        delta_Cl_a20     = temp[4];
+        delta_Cl_a20_lef = temp[5];
+
+        hifi_other_coeffs(alpha,el,temp);
+        delta_Cnbeta = temp[0];
+        delta_Clbeta = temp[1];
+        delta_Cm     = temp[2];
+        eta_el       = temp[3];
+        delta_Cm_ds  = 0;   // ignore the deep-stall effect
+    }   // end if
+    else if (fi_flag == 0) // LOFI Aerodynamic Table
+    {
+        dlef = 0.0;
+
+        damping(alpha,temp);
+        Cxq = temp[0];
+        Cyr = temp[1];
+        Cyp = temp[2];
+        Czq = temp[3];
+        Clr = temp[4];
+        Clp = temp[5];
+        Cmq = temp[6];
+        Cnr = temp[7];
+        Cnp = temp[8];
+
+        dmomdcon(alpha,beta,temp);
+        delta_Cl_a20 = temp[0];
+        delta_Cl_r30 = temp[1];
+        delta_Cn_a20 = temp[2];
+        delta_Cn_r30 = temp[3];
+
+        clcn(alpha,beta,temp);
+        Cl = temp[0];
+        Cn = temp[1];
+
+        cxcm(alpha,el,temp);
+        Cx = temp[0];
+        Cm = temp[1];
+
+        Cy = -0.02*beta + 0.021*dail + 0.086*drud;
+
+        cz(alpha,beta,el,temp);
+        Cz = temp[0];
+
+        /* set all higher order terms of hifi that are not applicable to lofi equal to zero. */
+        delta_Cx_lef = 0.0;
+        delta_Cz_lef = 0.0;
+        delta_Cm_lef = 0.0;
+        delta_Cy_lef = 0.0;
+        delta_Cn_lef = 0.0;
+        delta_Cl_lef = 0.0;
+        delta_Cxq_lef = 0.0;
+        delta_Cyr_lef = 0.0;
+        delta_Cyp_lef = 0.0;
+        delta_Czq_lef = 0.0;
+        delta_Clr_lef = 0.0;
+        delta_Clp_lef = 0.0;
+        delta_Cmq_lef = 0.0;
+        delta_Cnr_lef = 0.0;
+        delta_Cnp_lef = 0.0;
+        delta_Cy_r30 = 0.0;
+        delta_Cy_a20 = 0.0;
+        delta_Cy_a20_lef = 0.0;
+        delta_Cn_a20_lef = 0.0;
+        delta_Cl_a20_lef = 0.0;
+        delta_Cnbeta = 0.0;
+        delta_Clbeta = 0.0;
+        delta_Cm = 0.0;
+        eta_el = 1.0;   // Needs to be one, see Equation for Cm_tot.
+        delta_Cm_ds = 0.0;
+
+    }   // end else if
+
+    /* Compute Cx_tot, Cz_tot, Cm_tot, Cy_tot, Cn_tot, and Cl_tot (based on Page 37--40 of NASA report 1538) */
 }
