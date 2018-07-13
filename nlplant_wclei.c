@@ -287,4 +287,64 @@ void nlplant(double *xu,double *xdot){
     }   // end else if
 
     /* Compute Cx_tot, Cz_tot, Cm_tot, Cy_tot, Cn_tot, and Cl_tot (based on Page 37--40 of NASA report 1538) */
-}
+    // Cx_tot
+    dXdQ = (cbar / (2 * vt)) * (Cxq + delta_Cxq_lef * dlef);
+    Cx_tot = Cx + delta_Cx_lef * dlef + dXdQ * Q;
+    // Cz_tot
+    dZdQ = (cbar / (2 * vt)) * (Czq + delta_Czq_lef * dlef); // original version: dZdQ = (cbar/(2*vt))*(Czq + delta_Cz_lef*dlef)
+    Cz_tot = Cz + delta_Cz_lef * dlef + dZdQ * Q;
+    // Cm_tot
+    dMdQ = (cbar / (2 * vt)) * (Cmq + delta_Cmq_lef * dlef);
+    Cm_tot = Cm*eta_el + Cz_tot*(xcgr -xcg) + delta_Cm_lef * dlef + dMdQ * Q + delta_Cm + delta_Cm_ds;
+    // Cy_tot
+    dYdail = delta_Cy_a20 + delta_Cy_a20_lef * dlef;
+    dYdR = (B / (2 * vt)) * (Cyr + delta_Cyr_lef * dlef);
+    dYdP = (B / (2 * vt)) * (Cyp + delta_Cyp_lef * dlef);
+    Cy_tot = Cy + delta_Cy_lef * dlef + dYdail * dail + delta_Cy_r30 * drud + dYdR * R + dYdP * P;
+    // Cn_tot
+    dNdail = delta_Cn_a20 + delta_Cn_a20_lef * dlef;
+    dNdR = (B / (2 * vt)) * (Cnr + delta_Cnr_lef * dlef);
+    dNdP = (B / (2 * vt)) * (Cnp + delta_Cnp_lef * dlef);
+    Cn_tot = Cn + delta_Cn_lef * dlef - Cy_tot * (xcgr - xcg)*(cbar/B) + dNdail * dail + delta_Cn_r30 * drud + dNdR * R + dNdP * P + delta_Cnbeta * beta;
+    // Cl_tot
+    dLdail = delta_Cl_a20 + delta_Cl_a20_lef * dlef;
+    dLdR = (B / (2 * vt)) * (Clr + delta_Clr_lef * dlef);
+    dLdP = (B / (2 * vt)) * (Clp + delta_Clp_lef * dlef);
+    Cl_tot = Cl + delta_Cl_lef * dlef + dLdail * dail + delta_Cl_r30 * drud + dLdR * R + dLdP * P + delta_Clbeta * beta;
+
+    /* Compute Udot, Vdot, and Wdot (based on Page 36 of NASA report 1538) */
+    Udot = R*V - Q*W - g*st + qbar*S*Cx_tot/m + T/m;
+    Vdot = P*W - R*U + g*ct*sphi + qbar*S*Cy_tot/m;
+    Wdot = Q*U - P*V + g*ct*cphi + qbar*S*Cz_tot/m;
+
+    /* vt_dot */
+    xdot[6] = (U*Udot + V*Vdot + W*Wdot)/vt;
+    /* alpha_dot */
+    xdot[7] = (U*Wdot - W*Udot)/(U*U + W*W);
+    /* beta_dot */
+    xdot[8] = (Vdot*vt - V*xdot[6])/(vt*vt*cb);
+
+    /* Compute Pdot, Qdot, and Rdot (based on Page 32 of Stevens and Lewis) */
+    L_tot = Cl_tot*qbar*S*B;
+    M_tot = Cm_tot*qbar*S*cbar;
+    N_tot = Cn_tot*qbar*S*B;
+    denom = Jx*Jz - Jxz*Jxz;
+    xdot[9] = (Jz*L_tot + Jxz*N_tot - (Jz*(Jz-Jy)+Jxz*Jxz)*Q*R + Jxz*(Jx-Jy+Jz)*P*Q + Jxz*Q*Heng)/denom;    // Pdot
+    xdot[10] = (M_tot + (Jz-Jx)*P*R - Jxz*(P*P-R*R) - R*Heng)/Jy;   // Qdot
+    xdot[11] = (Jx*N_tot + Jxz*L_tot + (Jx*(Jx-Jy)+Jxz*Jxz)*P*Q - Jxz*(Jx-Jy+Jz)*Q*R + Jx*Q*Heng)/denom;    // Rdot
+
+    /*  Create Accelerations */
+    accels(xu,xdot,temp);
+    xdot[12] = temp[0]; // anx_cg
+    xdot[13] = temp[1]; // any_cg 
+    xdot[14] = temp[2]; // anz_cg
+    
+    /* Record the Mach Number, Dynamic Presseure, and Static Pressure */
+    xdot[15] = mach;
+    xdot[16] = qbar;
+    xdot[17] = ps;
+
+    /* free the variable pointed by temp */
+    free(temp);
+
+};  // end function: nlplant()
