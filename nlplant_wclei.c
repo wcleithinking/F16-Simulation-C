@@ -145,27 +145,14 @@ void nlplant(double *xu,double *xdot){
     atmos(alt,vt,temp);
     mach = temp[0];
     qbar = temp[1];
-    ps   = temp[2]; 
+    ps   = temp[2];
 
     /*-----------------------------------------------------------------------*/
-    /*                          The Dynamics                                 */
+    /*                          AeroDynamics                                 */
     /*-----------------------------------------------------------------------*/
-    /* Navigation Equations */
-    U = vt*ca*cb;
-    V = vt*sb;
-    W = vt*sa*cb;
-    xdot[0] = U*(ct*cpsi) + V*(sphi*cpsi*st - cphi*spsi) + W*(cphi*st*cpsi + sphi*spsi);    // nposdot
-    xdot[1] = U*(ct*spsi) + V*(sphi*spsi*st + cphi*cpsi) + W*(cphi*st*spsi - sphi*cpsi);    // eposdot
-    xdot[2] = U*st - V*(sphi*ct) - W*(cphi*ct); // altdot
-    /* Kinematic Equations */
-    xdot[3] = P + tt*(Q*sphi + R*cphi); // phidot
-    xdot[4] = Q*cphi - R*sphi;  // thetadot
-    xdot[5] = (Q*sphi + R*cphi)/ct; //psidot
-
-    /* Aerodynamic Data */
-    if (fi_flag == 1)   // HIFI Aerodynamic Table
+    if (fi_flag == 1) // HIFI Aerodynamic Table
     {
-        hifi_C(alpha,beta,el,temp);
+        hifi_C(alpha, beta, el, temp);
         Cx = temp[0];
         Cz = temp[1];
         Cm = temp[2];
@@ -173,7 +160,7 @@ void nlplant(double *xu,double *xdot){
         Cn = temp[4];
         Cl = temp[5];
 
-        hifi_damping(alpha,temp);
+        hifi_damping(alpha, temp);
         Cxq = temp[0];
         Cyr = temp[1];
         Cyp = temp[2];
@@ -184,7 +171,7 @@ void nlplant(double *xu,double *xdot){
         Cnr = temp[7];
         Cnp = temp[8];
 
-        hifi_C_lef(alpha,beta,temp);
+        hifi_C_lef(alpha, beta, temp);
         delta_Cx_lef = temp[0];
         delta_Cz_lef = temp[1];
         delta_Cm_lef = temp[2];
@@ -192,7 +179,7 @@ void nlplant(double *xu,double *xdot){
         delta_Cn_lef = temp[4];
         delta_Cl_lef = temp[5];
 
-        hifi_damping_lef(alpha,temp);
+        hifi_damping_lef(alpha, temp);
         delta_Cxq_lef = temp[0];
         delta_Cyr_lef = temp[1];
         delta_Cyp_lef = temp[2];
@@ -203,31 +190,31 @@ void nlplant(double *xu,double *xdot){
         delta_Cnr_lef = temp[7];
         delta_Cnp_lef = temp[8];
 
-        hifi_rudder(alpha,beta,temp);
+        hifi_rudder(alpha, beta, temp);
         delta_Cy_r30 = temp[0];
         delta_Cn_r30 = temp[1];
         delta_Cl_r30 = temp[2];
 
-        hifi_ailerons(alpha,beta,temp);
-        delta_Cy_a20     = temp[0];
+        hifi_ailerons(alpha, beta, temp);
+        delta_Cy_a20 = temp[0];
         delta_Cy_a20_lef = temp[1];
-        delta_Cn_a20     = temp[2];
+        delta_Cn_a20 = temp[2];
         delta_Cn_a20_lef = temp[3];
-        delta_Cl_a20     = temp[4];
+        delta_Cl_a20 = temp[4];
         delta_Cl_a20_lef = temp[5];
 
-        hifi_other_coeffs(alpha,el,temp);
+        hifi_other_coeffs(alpha, el, temp);
         delta_Cnbeta = temp[0];
         delta_Clbeta = temp[1];
-        delta_Cm     = temp[2];
-        eta_el       = temp[3];
-        delta_Cm_ds  = 0;   // ignore the deep-stall effect
-    }   // end if
+        delta_Cm = temp[2];
+        eta_el = temp[3];
+        delta_Cm_ds = 0;   // ignore the deep-stall effect
+    }                      // end if
     else if (fi_flag == 0) // LOFI Aerodynamic Table
     {
         dlef = 0.0;
 
-        damping(alpha,temp);
+        damping(alpha, temp);
         Cxq = temp[0];
         Cyr = temp[1];
         Cyp = temp[2];
@@ -238,23 +225,23 @@ void nlplant(double *xu,double *xdot){
         Cnr = temp[7];
         Cnp = temp[8];
 
-        dmomdcon(alpha,beta,temp);
+        dmomdcon(alpha, beta, temp);
         delta_Cl_a20 = temp[0];
         delta_Cl_r30 = temp[1];
         delta_Cn_a20 = temp[2];
         delta_Cn_r30 = temp[3];
 
-        clcn(alpha,beta,temp);
+        clcn(alpha, beta, temp);
         Cl = temp[0];
         Cn = temp[1];
 
-        cxcm(alpha,el,temp);
+        cxcm(alpha, el, temp);
         Cx = temp[0];
         Cm = temp[1];
 
-        Cy = -0.02*beta + 0.021*dail + 0.086*drud;
+        Cy = -0.02 * beta + 0.021 * dail + 0.086 * drud;
 
-        cz(alpha,beta,el,temp);
+        cz(alpha, beta, el, temp);
         Cz = temp[0];
 
         /* set all higher order terms of hifi that are not applicable to lofi equal to zero. */
@@ -281,10 +268,10 @@ void nlplant(double *xu,double *xdot){
         delta_Cnbeta = 0.0;
         delta_Clbeta = 0.0;
         delta_Cm = 0.0;
-        eta_el = 1.0;   // Needs to be one, see Equation for Cm_tot.
+        eta_el = 1.0; // Needs to be one, see Equation for Cm_tot.
         delta_Cm_ds = 0.0;
 
-    }   // end else if
+    } // end else if
 
     /* Compute Cx_tot, Cz_tot, Cm_tot, Cy_tot, Cn_tot, and Cl_tot (based on Page 37--40 of NASA report 1538) */
     // Cx_tot
@@ -295,7 +282,7 @@ void nlplant(double *xu,double *xdot){
     Cz_tot = Cz + delta_Cz_lef * dlef + dZdQ * Q;
     // Cm_tot
     dMdQ = (cbar / (2 * vt)) * (Cmq + delta_Cmq_lef * dlef);
-    Cm_tot = Cm*eta_el + Cz_tot*(xcgr -xcg) + delta_Cm_lef * dlef + dMdQ * Q + delta_Cm + delta_Cm_ds;
+    Cm_tot = Cm * eta_el + Cz_tot * (xcgr - xcg) + delta_Cm_lef * dlef + dMdQ * Q + delta_Cm + delta_Cm_ds;
     // Cy_tot
     dYdail = delta_Cy_a20 + delta_Cy_a20_lef * dlef;
     dYdR = (B / (2 * vt)) * (Cyr + delta_Cyr_lef * dlef);
@@ -305,18 +292,32 @@ void nlplant(double *xu,double *xdot){
     dNdail = delta_Cn_a20 + delta_Cn_a20_lef * dlef;
     dNdR = (B / (2 * vt)) * (Cnr + delta_Cnr_lef * dlef);
     dNdP = (B / (2 * vt)) * (Cnp + delta_Cnp_lef * dlef);
-    Cn_tot = Cn + delta_Cn_lef * dlef - Cy_tot * (xcgr - xcg)*(cbar/B) + dNdail * dail + delta_Cn_r30 * drud + dNdR * R + dNdP * P + delta_Cnbeta * beta;
+    Cn_tot = Cn + delta_Cn_lef * dlef - Cy_tot * (xcgr - xcg) * (cbar / B) + dNdail * dail + delta_Cn_r30 * drud + dNdR * R + dNdP * P + delta_Cnbeta * beta;
     // Cl_tot
     dLdail = delta_Cl_a20 + delta_Cl_a20_lef * dlef;
     dLdR = (B / (2 * vt)) * (Clr + delta_Clr_lef * dlef);
     dLdP = (B / (2 * vt)) * (Clp + delta_Clp_lef * dlef);
     Cl_tot = Cl + delta_Cl_lef * dlef + dLdail * dail + delta_Cl_r30 * drud + dLdR * R + dLdP * P + delta_Clbeta * beta;
 
+    /*-----------------------------------------------------------------------*/
+    /*                              Dynamics                                 */
+    /*-----------------------------------------------------------------------*/
+    /* Navigation Equations */
+    U = vt*ca*cb;
+    V = vt*sb;
+    W = vt*sa*cb;
+    xdot[0] = U*(ct*cpsi) + V*(sphi*cpsi*st - cphi*spsi) + W*(cphi*st*cpsi + sphi*spsi);    // nposdot
+    xdot[1] = U*(ct*spsi) + V*(sphi*spsi*st + cphi*cpsi) + W*(cphi*st*spsi - sphi*cpsi);    // eposdot
+    xdot[2] = U*st - V*(sphi*ct) - W*(cphi*ct); // altdot
+    /* Kinematic Equations */
+    xdot[3] = P + tt*(Q*sphi + R*cphi); // phidot
+    xdot[4] = Q*cphi - R*sphi;  // thetadot
+    xdot[5] = (Q*sphi + R*cphi)/ct; //psidot
+
     /* Compute Udot, Vdot, and Wdot (based on Page 36 of NASA report 1538) */
     Udot = R*V - Q*W - g*st + qbar*S*Cx_tot/m + T/m;
     Vdot = P*W - R*U + g*ct*sphi + qbar*S*Cy_tot/m;
     Wdot = Q*U - P*V + g*ct*cphi + qbar*S*Cz_tot/m;
-
     /* vt_dot */
     xdot[6] = (U*Udot + V*Vdot + W*Wdot)/vt;
     /* alpha_dot */
