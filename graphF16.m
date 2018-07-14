@@ -15,7 +15,7 @@ hifiID = fopen(hifi_data_file);
 
 title_string = sprintf('Trimed at Velocity = %.1f \n Alt. = %.1f', velocity, altitude);
 %        title_string = sprintf('');
-if (lofiID > 0 & hifiID > 0)
+if (lofiID > 0 && hifiID > 0)
     
     fclose(lofiID);
     fclose(hifiID);
@@ -32,7 +32,7 @@ if (lofiID > 0 & hifiID > 0)
     title(title_string);
     
     subplot(232)
-    plot(time_lo, epos_lo, time_hi, epos_hi, '--');     
+    plot(time_lo, epos_lo, time_hi, epos_hi, '--');
     ylabel('East Pos.');
     xlabel('Time (sec)');
     title(title_string);
@@ -52,7 +52,7 @@ if (lofiID > 0 & hifiID > 0)
     legend('LOFI', 'HIFI');
     
     subplot(235)
-    plot(time_lo, theta_lo, time_hi, theta_hi, '--');     
+    plot(time_lo, theta_lo, time_hi, theta_hi, '--');
     ylabel('THETA (degrees)');
     xlabel('Time (sec)');
     title(title_string);
@@ -78,7 +78,7 @@ if (lofiID > 0 & hifiID > 0)
     legend('LOFI', 'HIFI');
     
     subplot(232)
-    plot(time_lo, alpha_lo, time_hi, alpha_hi, '--');     
+    plot(time_lo, alpha_lo, time_hi, alpha_hi, '--');
     ylabel('Angle of Attack (degrees)');
     xlabel('Time (sec)');
     title(title_string);
@@ -123,7 +123,7 @@ if (lofiID > 0 & hifiID > 0)
     title(title_string);
     
     subplot(232)
-    plot(time_lo, ny_lo, time_hi, ny_hi, '--');     
+    plot(time_lo, ny_lo, time_hi, ny_hi, '--');
     ylabel('acc y');
     xlabel('Time (sec)');
     title(title_string);
@@ -164,7 +164,7 @@ if (lofiID > 0 & hifiID > 0)
     title(title_string);
     
     subplot(222)
-    plot(time_lo, ele_lo, time_hi, ele_hi, '--');     
+    plot(time_lo, ele_lo, time_hi, ele_hi, '--');
     ylabel('del Elevator');
     xlabel('Time (sec)');
     title(title_string);
@@ -181,7 +181,7 @@ if (lofiID > 0 & hifiID > 0)
     ylabel('del Rudder');
     xlabel('Time (sec)');
     title(title_string);
-
+    
     alt_min_hi = min(alt_hi) - 2000;
     alt_min(1:length(alt_lo),1) = alt_min_hi;
     figure(5)
@@ -192,17 +192,17 @@ if (lofiID > 0 & hifiID > 0)
     ylabel('North Position')
     zlabel('Altitude')
     
-%     figure(6)
-%     for j = 1:10:length(epos_lo)
-%         plot3(epos_lo,npos_lo,alt_lo, 'b:',epos_hi,npos_hi,alt_hi, 'g:', epos_lo(j),npos_lo(j),alt_lo(j), 'ro', epos_hi(j),npos_hi(j),alt_hi(j), 'ro')
-%         grid;
-%         xlabel('East Position')
-%         ylabel('North Position')
-%         zlabel('Altitude')
-%         legend('LOFI', 'HIFI')
-%         F(j) = getframe;
-%     end
-     
+    %     figure(6)
+    %     for j = 1:10:length(epos_lo)
+    %         plot3(epos_lo,npos_lo,alt_lo, 'b:',epos_hi,npos_hi,alt_hi, 'g:', epos_lo(j),npos_lo(j),alt_lo(j), 'ro', epos_hi(j),npos_hi(j),alt_hi(j), 'ro')
+    %         grid;
+    %         xlabel('East Position')
+    %         ylabel('North Position')
+    %         zlabel('Altitude')
+    %         legend('LOFI', 'HIFI')
+    %         F(j) = getframe;
+    %     end
+    
 else
     
     new_data_file = sprintf('%s%.3f%s%.3f%s%.3f_%smodel_alt%0.f_vel%.0f.txt', surface1, ElevatorDis, surface2, AileronDis, surface3, RudderDis, fi_type, altitude, velocity);
@@ -218,7 +218,7 @@ else
     title(title_string);
     
     subplot(232)
-    plot(time_new, epos_new);     
+    plot(time_new, epos_new);
     ylabel('East Pos.');
     xlabel('Time (sec)');
     title(title_string);
@@ -236,7 +236,7 @@ else
     title(title_string);
     
     subplot(235)
-    plot(time_new, theta_new);     
+    plot(time_new, theta_new);
     ylabel('THETA (degrees)');
     xlabel('Time (sec)');
     title(title_string);
@@ -258,7 +258,7 @@ else
     title(title_string);
     
     subplot(232)
-    plot(time_new, alpha_new);     
+    plot(time_new, alpha_new);
     ylabel('Angle of Attack (degrees)');
     xlabel('Time (sec)');
     title(title_string);
@@ -298,7 +298,7 @@ else
     title(title_string);
     
     subplot(232)
-    plot(time_new, ny_new);     
+    plot(time_new, ny_new);
     ylabel('acc y');
     xlabel('Time (sec)');
     title(title_string);
@@ -339,7 +339,7 @@ else
     title(title_string);
     
     subplot(222)
-    plot(time_new, ele_new);     
+    plot(time_new, ele_new);
     ylabel('del Elevator');
     xlabel('Time (sec)');
     title(title_string);
@@ -368,16 +368,16 @@ else
     xlabel('East Position')
     ylabel('North Position')
     zlabel('Altitude')
-%     figure(6)
-%     for j = 1:10:length(epos_new)
-%         plot3(epos_new, npos_new, alt_new, 'b:', epos_new(j),npos_new(j),alt_new(j), 'ro')
-%         grid;
-%         xlabel('East Position')
-%         ylabel('North Position')
-%         zlabel('Altitude')
-%         legend('LOFI', 'HIFI')
-%         F(j) = getframe;
-%     end
+    %     figure(6)
+    %     for j = 1:10:length(epos_new)
+    %         plot3(epos_new, npos_new, alt_new, 'b:', epos_new(j),npos_new(j),alt_new(j), 'ro')
+    %         grid;
+    %         xlabel('East Position')
+    %         ylabel('North Position')
+    %         zlabel('Altitude')
+    %         legend('LOFI', 'HIFI')
+    %         F(j) = getframe;
+    %     end
 end  % if end
 
 %movie(F)

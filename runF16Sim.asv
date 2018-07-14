@@ -96,12 +96,12 @@ if dis_flag == 'y'
     DisEle_2 = -2*ElevatorDis;
     DisEle_3 = ElevatorDis;
     
-    AileronDis = input('Enter the aileron distrubance deflection      (deg) :  ');
+    AileronDis = input('Enter the aileron distrubance deflection            (deg) :  ');
     DisAil_1 = AileronDis;
     DisAil_2 = -2*AileronDis;
     DisAil_3 = AileronDis;
     
-    RudderDis = input('Enter the rudder distrubance deflection        (deg) :  ');
+    RudderDis = input('Enter the rudder distrubance deflection             (deg) :  ');
     DisRud_1 = RudderDis;
     DisRud_2 = -2*RudderDis;
     DisRud_3 = RudderDis;
