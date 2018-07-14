@@ -22,8 +22,7 @@ int sign(double);
 /*****************************************************************************/
 /*                  The mexFunction used in Matlab Environment               */
 /*****************************************************************************/
-void mexFunction(int nlhs, mxArray *plhs[],
-                 int nrhs, const mxArray *prhs[])
+void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
     #define XU prhs[0]  // the first input parameter
     #define XDOT plhs[0]   // the first output parameter
@@ -34,14 +33,15 @@ void mexFunction(int nlhs, mxArray *plhs[],
     if ( mxGetM(XU)==18 && mxGetN(XU)==1 ) {
         /* Call nlplant Function */
         xup = mxGetPr(XU);  // let the pointer xup point to the input XU 
-        XDOT = mxCreatDoubleMatrix(18,1,mxREAL); // initialize the first output parameter
-        xdotp = mxGetPr(XDOT) // let the pointter xdotp point to the output XDOT
+        XDOT = mxCreateDoubleMatrix(18,1,mxREAL); // initialize the first output parameter
+        xdotp = mxGetPr(XDOT); // let the pointter xdotp point to the output XDOT
+        
         nlplant(xup,xdotp); // use the nlplant function to update the first output parameter
 
         /* Debug */
-        for (i=0;i<=14;i++){
-            printf("xdotp(%d) = %e\n",i+1,xdotp[i]);
-        }   // end Debug
+        // for (i=0;i<=14;i++){
+        //    printf("xdotp(%d) = %e\n",i+1,xdotp[i]);
+        // }   // end Debug
 
     }   // end if 
     else {
@@ -73,8 +73,8 @@ void nlplant(double *xu,double *xdot){
     /* NASA Data ( translated via Equation 2.4--2.6 on Page 80 of Stevens and Lewis ) */
     double Jy = 55814.0;    // slug*ft^2 (about 55814*14.593903*0.3048^2 kg*m^2)
     double Jxz = 982.0;     // slug*ft^2
-    double Jz = 63100.0     // slug*ft^2
-    double Jx = 9496.0      // slug*ft^2
+    double Jz = 63100.0;     // slug*ft^2
+    double Jx = 9496.0;      // slug*ft^2
 
     double npos, epos, alt; // north position, east position and altitude 
     double phi, theta, psi; // the Euler angles
@@ -107,17 +107,20 @@ void nlplant(double *xu,double *xdot){
     phi   = xu[3];  // rad    
     theta = xu[4];  // rad
     psi   = xu[5];  // rad
+    
     vt    = xu[6];
-    alpha = xu[7];  // rad
-    beta  = xu[8];  // rad
+    alpha = xu[7]*r2d;  // degrees
+    beta  = xu[8]*r2d;  // degrees
     P     = xu[9];
     Q     = xu[10];
     R     = xu[11];
-    sa    = sin(alpha);
-    ca    = cos(alpha);
-    sb    = sin(beta);
-    cb    = cos(beta);
-    tb    = tan(beta);
+    
+    sa    = sin(xu[7]);
+    ca    = cos(xu[7]);
+    sb    = sin(xu[8]);
+    cb    = cos(xu[8]);
+    tb    = tan(xu[8]);
+    
     st    = sin(theta);
     ct    = cos(theta);
     tt    = tan(theta);
@@ -196,19 +199,19 @@ void nlplant(double *xu,double *xdot){
         delta_Cl_r30 = temp[2];
 
         hifi_ailerons(alpha, beta, temp);
-        delta_Cy_a20 = temp[0];
+        delta_Cy_a20     = temp[0];
         delta_Cy_a20_lef = temp[1];
-        delta_Cn_a20 = temp[2];
+        delta_Cn_a20     = temp[2];
         delta_Cn_a20_lef = temp[3];
-        delta_Cl_a20 = temp[4];
+        delta_Cl_a20     = temp[4];
         delta_Cl_a20_lef = temp[5];
 
         hifi_other_coeffs(alpha, el, temp);
         delta_Cnbeta = temp[0];
         delta_Clbeta = temp[1];
-        delta_Cm = temp[2];
-        eta_el = temp[3];
-        delta_Cm_ds = 0;   // ignore the deep-stall effect
+        delta_Cm     = temp[2];
+        eta_el       = temp[3];
+        delta_Cm_ds  = 0;   // ignore the deep-stall effect
     }                      // end if
     else if (fi_flag == 0) // LOFI Aerodynamic Table
     {
@@ -398,9 +401,9 @@ void accels(double *state,double *xdot, double *y){
     P     = state[9];
     Q     = state[10];
     R     = state[11];
-    vt_dot    = xout[6];
-    alpha_dot = xout[7];
-    beta_dot  = xout[8];
+    vt_dot    = xdot[6];
+    alpha_dot = xdot[7];
+    beta_dot  = xdot[8];
 
     sina = sin(alpha);
     cosa = cos(alpha);
@@ -415,7 +418,7 @@ void accels(double *state,double *xdot, double *y){
 
     nx_cg = 1.0/grav*(u_dot + Q*vel_w - R*vel_v) + sin(theta);
     ny_cg = 1.0/grav*(v_dot + R*vel_u - P*vel_w) - cos(theta)*sin(phi);
-    nz_cg = -1.0/grav*(w_dot + P*vel_v - Q*vel_u) + cos(theta*cos(phi);
+    nz_cg = -1.0/grav*(w_dot + P*vel_v - Q*vel_u) + cos(theta)*cos(phi);
 
     y[0] = nx_cg;
     y[1] = ny_cg;
@@ -457,5 +460,5 @@ int sign(double in){
         out = 0;
     }
 
-    return out
+    return out;
 }
