@@ -8,8 +8,13 @@
 % 
 %================================================
 
-clear;
-clc;
+%% Start Timer
+%%
+tic;
+
+%% Prepare
+%%
+clc; clear; close all;
 
 global fi_type fi_flag_Simulink;
 global altitude velocity;
@@ -73,52 +78,47 @@ end
 altitude = input('Enter the altitude for the simulation (ft)  :  ');
 velocity = input('Enter the velocity for the simulation (ft/s):  ');
 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Initialize some varibles used to create disturbances. %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+%% Initialize some varibles used to create disturbances.
+%%
 DisEle_1 = 0;    DisEle_2 = 0;    DisEle_3 = 0;
 DisAil_1 = 0;    DisAil_2 = 0;    DisAil_3 = 0;
 DisRud_1 = 0;    DisRud_2 = 0;    DisRud_3 = 0;
 ElevatorDis = 0; AileronDis = 0;  RudderDis = 0;
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Find out which surface to create a disturbance on.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 
 dis_flag = input('Would you like to create a disturbance on a surface (y/n):  ', 's');
+disp(newline);
 
 if dis_flag == 'y' 
   ElevatorDis = input('Enter the elevator distrubance deflection           (deg) :  ');
   DisEle_1 = ElevatorDis;    
   DisEle_2 = -2*ElevatorDis;    
   DisEle_3 = ElevatorDis; 
-  surfacedef = 'elevator';
   
   AileronDis = input('Enter the aileron distrubance deflection            (deg) :  ');
   DisAil_1 = AileronDis;    
   DisAil_2 = -2*AileronDis;    
   DisAil_3 = AileronDis; 
-  surfacedef = 'aileron';
   
   RudderDis = input('Enter the rudder distrubance deflection             (deg) :  ');
   DisRud_1 = RudderDis;    
   DisRud_2 = -2*RudderDis;    
   DisRud_3 = RudderDis; 
-  surfacedef = 'rudder';
+  
+  surfacedis = 'ele_ail_rud';
   
 elseif dis_flag == 'n'
-  surfacedef = 'none';
+  surfacedis = 'none';
   
 else
   disp('Invalid Selection and we will choose the default value: n!');
   disp(newline);
-  surfacedef = 'none';
+  surfacedis = 'none';
 end
 
-
 %% Time Setting
+%%
 delta_T = 0.001;
 TStart = 0; TFinal = 60;
 
@@ -127,45 +127,52 @@ TStart = 0; TFinal = 60;
 % The following values seem to trim to most flight condition. 
 % If the F16 does not trim, change these values.
 %================================================
+%%
 alpha = 8.49;           % AOA, degrees
 thrust = 5000;          % thrust, lbs
 elevator = -0.09;       % elevator, degrees
 rudder = -0.01;         % rudder angle, degrees
 aileron = 0.01;         % aileron, degrees
 
+%% Trim the Initial Conditions
+%%
 [trim_state, trim_thrust, trim_control, dLEF, UX] = trim_F16(thrust, elevator, alpha, aileron, rudder, velocity, altitude);
 
+%% Simulate the F-16 Dynamics
+%%
 sim( 'F16Block' ,[TStart TFinal]);
 
+%% Prepare the file to save the data
+%%
 trim_file = sprintf('%s%.3f%s%.3f%s%.3f_%smodel_alt%0.f_vel%.0f.txt', surface1, ElevatorDis, surface2, AileronDis, surface3, RudderDis, fi_type, altitude, velocity);
-
 fid_trim = fopen(trim_file, 'w');
-
-heading1 = sprintf('%% \n\t\t  %s DATA Trim-Doublet on %s: Alt %.0f, Alpha %.0f\n\n', fi_type, surfacedef, altitude, alpha);
+%heading1 = sprintf('\n\t\t  %s DATA Trim-Doublet on %s: Alt %.0f, Alpha %.0f\n\n', fi_type, surfacedef, altitude, alpha);
 heading2 = sprintf('\ntime,npos,epos,alt,phi,theta,psi,vel,alpha,beta,p,q,r,nx,ny,nz,mach,qbar,ps,\n\n');
-
-fprintf(fid_trim,heading1);
+%fprintf(fid_trim,heading1);
 fprintf(fid_trim,heading2);
 
+%% Save the simulation data
+%%
 fid_trim = fopen(trim_file, 'a');
-
 for row = 1 : 1 : length(y_sim(:,1))
-  fprintf(fid_trim,'%8.5f,',T(row,:));
-  for column = 1 : 1 : length(y_sim(1,:))
-    fprintf(fid_trim,'%8.5f,',y_sim(row,column));
-  end
-  for column = 1:1:length(surfaces(1,:))
-    fprintf(fid_trim,'%8.5f,',surfaces(row,column));
-  end
-  fprintf(fid_trim,'\n');
+    fprintf(fid_trim,'%8.5f,',T(row,:));
+    for column = 1 : 1 : length(y_sim(1,:))
+        fprintf(fid_trim,'%8.5f,',y_sim(row,column));
+    end
+    for column = 1:1:length(surfaces(1,:))
+        fprintf(fid_trim,'%8.5f,',surfaces(row,column));
+    end
+    fprintf(fid_trim,'\n');
 end
-
 fclose(fid_trim);
 
+%% Plot
+%%
 plot_flag = input('Plot results (y/n):  ', 's');
-
-if plot_flag == 'n'
-  %break;
-else
+if plot_flag == 'y'
   graphF16;
 end
+
+%% End Timer
+%%
+toc
