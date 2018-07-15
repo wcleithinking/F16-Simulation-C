@@ -204,7 +204,7 @@ double _Cm(double alpha,double beta,double dele){
 	int i,FILESIZE;
 	int nDimension = 3; 
 	double x[3];	
-	FILESIZE = 1900;	
+	FILESIZE = 1900;	// (2*9+1)*19*5  the dimension of the table
 
 	/* Initialise everything when this function is called for the first time */
 	if(flag==0){
@@ -1866,11 +1866,11 @@ double _delta_Cm_ds(double alpha, double el){
 
 void hifi_C(double alpha,double beta,double el,double *retVal){
 	retVal[0] = _Cx(alpha,beta,el);
-        retVal[1] = _Cz(alpha,beta,el);
+    retVal[1] = _Cz(alpha,beta,el);
 	retVal[2] = _Cm(alpha,beta,el);
-        retVal[3] = _Cy(alpha,beta);
-        retVal[4] = _Cn(alpha,beta,el);
-        retVal[5] = _Cl(alpha,beta,el);
+	retVal[3] = _Cy(alpha,beta);
+    retVal[4] = _Cn(alpha,beta,el);
+    retVal[5] = _Cl(alpha,beta,el);
 }
 
 void hifi_damping(double alpha, double *retVal){
