@@ -319,19 +319,19 @@ else
     
     subplot(234)
     plot(time_new, phi_new);
-    ylabel('PHI (degrees)');
+    ylabel('Roll: \phi (degrees)');
     xlabel('Time (sec)');
     title(title_string);
     
     subplot(235)
     plot(time_new, theta_new);
-    ylabel('THETA (degrees)');
+    ylabel('Pitch: \theta (degrees)');
     xlabel('Time (sec)');
     title(title_string);
     
     subplot(236)
     plot(time_new ,psi_new);
-    ylabel('PSI (degrees)');
+    ylabel('Yaw: \psi (degrees)');
     xlabel('Time (sec)');
     title(title_string);
     
@@ -346,31 +346,31 @@ else
     
     subplot(232)
     plot(time_new, alpha_new);
-    ylabel('Angle of Attack (degrees)');
+    ylabel('Angle of Attack: \alpha (degrees)');
     xlabel('Time (sec)');
     title(title_string);
     
     subplot(233)
     plot(time_new , sideslip_new);
-    ylabel('Side Slip (degrees)');
+    ylabel('Side Slip: \beta (degrees)');
     xlabel('Time (sec)');
     title(title_string);
     
     subplot(234)
     plot(time_new,roll_new);
-    ylabel('Roll Rate (deg/s)');
+    ylabel('Roll Rate: p (deg/s)');
     xlabel('Time (sec)');
     title(title_string);
     
     subplot(235)
     plot(time_new,pitch_new);
-    ylabel('Pitch Rate (deg/s)');
+    ylabel('Pitch Rate: q (deg/s)');
     xlabel('Time (sec)');
     title(title_string);
     
     subplot(236)
     plot(time_new, yaw_new);
-    ylabel('Yaw Rate (deg/s)');
+    ylabel('Yaw Rate: r (deg/s)');
     xlabel('Time (sec)');
     title(title_string);
     

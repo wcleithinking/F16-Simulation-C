@@ -139,6 +139,7 @@ aileron = 0.01;         % aileron, degrees
 
 %% Simulate the F-16 Dynamics
 %%
+trim_control = [0;0;0];
 sim( 'F16Block' ,[TStart TFinal]);
 
 %% Prepare the file to save the data
