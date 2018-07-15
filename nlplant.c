@@ -65,7 +65,7 @@ void nlplant(double *xu,double *xdot){
     double cbar = 11.32; // mean aero chord, ft
     double xcgr = 0.35;  // reference center of gravity as a fraction of cbar
     double xcg = 0.30;   // center of gravity as a fraction of cbar
-    double Heng = 0.0;   // turbine momentum along roll axis
+    double Heng = 160.0;   // turbine momentum along roll axis
     double pi = acos(-1);// use the acos function from "math.h" to define the value of pi
     double r2d = 180.0/pi; // radians to degrees
     double d2r = pi/180.0; // degrees to radians
